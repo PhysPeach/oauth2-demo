@@ -1,4 +1,3 @@
 appname = oauth2-demo
-appname = oauth2-demo
 httpport = 8080
 runmode = dev
