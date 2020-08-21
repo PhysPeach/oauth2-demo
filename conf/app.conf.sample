@@ -1,3 +1,11 @@
 appname = oauth2-demo
 httpport = 8080
 runmode = dev
+SessionOn = true
+
+googleClientId =
+googleProjectId =
+googleAuthUri = 
+googleTokenUri =
+googleClientSecret =
+googleRedirectUri = "http://localhost:8080/google/callback"
