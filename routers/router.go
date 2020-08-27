@@ -7,9 +7,14 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
-	ns := beego.NewNamespace("/google",
+	googleNs := beego.NewNamespace("/google",
 		beego.NSRouter("/", &controllers.GoogleController{}, "get:New"),
 		beego.NSRouter("callback", &controllers.GoogleController{}, "get:Create"),
 	)
-	beego.AddNamespace(ns)
+	beego.AddNamespace(googleNs)
+	discordNs := beego.NewNamespace("/discord",
+		beego.NSRouter("/", &controllers.DiscordController{}, "get:New"),
+		beego.NSRouter("callback", &controllers.DiscordController{}, "get:Create"),
+	)
+	beego.AddNamespace(discordNs)
 }

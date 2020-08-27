@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/physpeach/oauth2-demo/lib"
+	"github.com/physpeach/oauth2-demo/lib/google"
 	"github.com/astaxie/beego"
 	"google.golang.org/api/oauth2/v2"
 )
@@ -55,7 +55,6 @@ func (c *GoogleController) Create() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(tokenInfo)
 
 	c.Data["ID"] = tokenInfo.UserId
 	c.Data["Email"] = tokenInfo.Email
