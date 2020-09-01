@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/discord"
+	"github.com/najeira/randstr"
 )
 func init() {
 	goth.UseProviders(
@@ -36,11 +38,13 @@ func (c *DiscordController) New() {
 	if err != nil{
 		panic(err)
 	}
-	sess, err := p.BeginAuth("state")
+	state := randstr.CryptoString(16)
+	sess, err := p.BeginAuth(state)
 	if err != nil{
 		panic(err)
 	}
 	c.SetSession("goth", sess)
+	c.SetSession("state", state)
 	url, err := sess.GetAuthURL()
 	if err != nil{
 		panic(err)
@@ -55,7 +59,11 @@ func (c *DiscordController) Create() {
 		panic(err)
 	}
 	sess := c.GetSession("goth").(goth.Session)
-	sess.Authorize(p, c.Ctx.Request.URL.Query())
+	params := c.Ctx.Request.URL.Query()
+	if params.Get("state") != c.GetSession("state"){
+		panic(errors.New("wrong state"))
+	}
+	sess.Authorize(p, params)
 	user, err := p.FetchUser(sess)
 	if err != nil{
 		panic(err)
