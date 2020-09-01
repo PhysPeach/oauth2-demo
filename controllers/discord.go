@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	//"context"
-	//"errors"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/markbates/goth"

@@ -1,13 +1,23 @@
 package controllers
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	"github.com/physpeach/oauth2-demo/lib/google"
 	"github.com/astaxie/beego"
-	"google.golang.org/api/oauth2/v2"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/google"
 )
+func init() {
+	goth.UseProviders(
+		google.New(
+			beego.AppConfig.String("googleClientId"),
+			beego.AppConfig.String("googleClientSecret"),
+			beego.AppConfig.String("googleRedirectUri"),
+			"openid",
+			"email",
+			"profile",
+		),
+	)
+}
 
 // GoogleController operations for Google
 type GoogleController struct {
@@ -23,41 +33,36 @@ func (c *GoogleController) URLMapping() {
 }
 
 func (c *GoogleController) New() {
-	conf := google.GetConnect()
-	url := conf.AuthCodeURL("state")
+	p, err := goth.GetProvider("google")
+	if err != nil{
+		panic(err)
+	}
+	sess, err := p.BeginAuth("state")
+	if err != nil{
+		panic(err)
+	}
+	c.SetSession("goth", sess)
+	url, err := sess.GetAuthURL()
+	if err != nil{
+		panic(err)
+	}
 	fmt.Printf("Visit the URL for the auth dialog: %v", url)
 	c.Redirect(url, 302)
 }
 
-type CallbackRequest struct {
-	Code  string `form:"code"`
-	State string `form:"state"`
-}
 func (c *GoogleController) Create() {
-	request := CallbackRequest{}
-	if err := c.ParseForm(&request); err != nil {
+	p, err := goth.GetProvider("google")
+	if err != nil{
 		panic(err)
 	}
-	conf := google.GetConnect()
-	ctx := context.Background()
-	tok, err := conf.Exchange(ctx, request.Code)
-	if err != nil {
+	sess := c.GetSession("goth").(goth.Session)
+	sess.Authorize(p, c.Ctx.Request.URL.Query())
+	user, err := p.FetchUser(sess)
+	if err != nil{
 		panic(err)
 	}
-	if tok.Valid() == false {
-		panic(errors.New("vaild token"))
-	}
-	service, err := oauth2.New(conf.Client(ctx, tok))
-	if err != nil {
-		panic(err)
-	}
-	tokenInfo, err := service.Tokeninfo().AccessToken(tok.AccessToken).Context(ctx).Do()
-	if err != nil {
-		panic(err)
-	}
-
-	c.Data["ID"] = tokenInfo.UserId
-	c.Data["Email"] = tokenInfo.Email
+	c.Data["Name"] = user.Name
+	c.Data["Email"] = user.Email
 	c.TplName = "google/callback.tpl"
 }
 

@@ -4,8 +4,13 @@ runmode = dev
 SessionOn = true
 
 googleClientId =
-googleProjectId =
 googleAuthUri = 
 googleTokenUri =
 googleClientSecret =
 googleRedirectUri = "http://localhost:8080/google/callback"
+
+discordClientId = 
+discordAuthUri = 
+discordTokenUri = 
+discordClientSecret = 
+discordRedirectUri = 
